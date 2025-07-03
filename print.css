@@ -2,6 +2,7 @@
 body {
     font-family: sans-serif;
     color: #000; /* Ensure black text for printing */
+    font-size: 12pt; /* Base font size, matches PDF body text */
 }
 
 main.container > p {
@@ -14,11 +15,11 @@ main.container {
     margin: 0;
 }
 
-section:not(#outputSection) {
-    display: none;
-}
-
-h1, h2 {
+/* Hide elements not needed for printing */
+section:not(#outputSection),
+h1,
+h2,
+#gapNumbers {
     display: none;
 }
 
@@ -26,31 +27,33 @@ h1, h2 {
     display: block; /* Ensure the output section is visible */
 }
 
-#outputContainer {
-    /* Removed display: flex; as gapNumbers is removed */
-}
-
-#gapNumbers {
-    display: none;
+/* Style for the main worksheet title */
+#worksheetTitle {
+    font-size: 16pt; /* Matches PDF title */
+    font-weight: bold;
+    margin-bottom: 4mm;
 }
 
 #outputText {
     padding-left: 0;
-    font-size: 1em; /* Ensure readable font size */
-    line-height: 1.5; /* Improve readability */
+    font-size: 12pt; /* Matches PDF body text */
+    line-height: 1.6; /* Increased for better readability on paper */
 }
 
 #wordBank, #answerSection {
     margin-top: 10mm; /* Add space between sections */
     page-break-before: auto; /* Avoid breaking page inside these sections */
+    font-size: 12pt; /* Matches PDF content */
 }
 
+/* Styles for Word Bank and Answer Section titles */
 #wordBank h3, #answerSection h3 {
-    font-size: 1.2em;
-    margin-top: 5mm; /* Reduced top margin for print */
+    font-size: 14pt; /* Matches PDF section titles */
+    margin-top: 5mm;
     margin-bottom: 2mm;
 }
 
 #answerSection p {
     margin-bottom: 5mm;
+    font-size: 12pt; /* Matches PDF answer content */
 }
