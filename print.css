@@ -1,0 +1,56 @@
+/* Print-specific styles */
+body {
+    font-family: sans-serif;
+    color: #000; /* Ensure black text for printing */
+}
+
+main.container > p {
+    display: none;
+}
+
+main.container {
+    max-width: 100%;
+    padding: 10mm; /* Add some print margins */
+    margin: 0;
+}
+
+section:not(#outputSection) {
+    display: none;
+}
+
+h1, h2 {
+    display: none;
+}
+
+#outputSection {
+    display: block; /* Ensure the output section is visible */
+}
+
+#outputContainer {
+    /* Removed display: flex; as gapNumbers is removed */
+}
+
+#gapNumbers {
+    display: none;
+}
+
+#outputText {
+    padding-left: 0;
+    font-size: 1em; /* Ensure readable font size */
+    line-height: 1.5; /* Improve readability */
+}
+
+#wordBank, #answerSection {
+    margin-top: 10mm; /* Add space between sections */
+    page-break-before: auto; /* Avoid breaking page inside these sections */
+}
+
+#wordBank h3, #answerSection h3 {
+    font-size: 1.2em;
+    margin-top: 5mm; /* Reduced top margin for print */
+    margin-bottom: 2mm;
+}
+
+#answerSection p {
+    margin-bottom: 5mm;
+}

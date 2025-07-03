@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create fill-in-the-blank handouts or cloze tests with this simple free tool.">
+    <title>Clozet</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="print.css" media="print">
+</head>
+<body>
+    <main class="container">
+                <h1>Clozet</h1>
+        <p>Create fill-in-the-blank handouts or cloze tests with this simple free tool.</p>
+        <section>
+            <h2>Paste your text here</h2>
+            <textarea id="inputText" rows="10" placeholder="Paste your text here..."></textarea>
+            <label>
+                <input type="checkbox" id="keepFormatting" checked> Keep formatting
+            </label>
+        </section>
+        <section>
+            <h2>Select words to create gaps</h2>
+            <div id="wordSelection" class="grid"></div>
+        </section>
+        <section>
+            <h2>Settings</h2>
+            <div class="settings-group">
+                <div class="grid">
+                    <label>
+                        <input type="checkbox" id="numberGaps" checked> Number gaps
+                    </label>
+                    <label>
+                        <input type="checkbox" id="includeWordBank"> Include word bank
+                    </label>
+                    <label>
+                        <input type="checkbox" id="separateAnswers"> Separate answers section
+                    </label>
+                </div>
+                <div>
+                    <label for="gapLength">Gap length: <span id="gapLengthValue">10</span></label>
+                    <input type="range" id="gapLength" min="5" max="20" value="10">
+                </div>
+                <div>
+                    <label for="worksheetTitle">Worksheet title</label>
+                    <input type="text" id="worksheetTitle" placeholder="Enter title (optional)">
+                </div>
+            </div>
+        </section>
+        <section id="outputSection">
+            <h2>Output</h2>
+            <div id="outputContainer">
+                <h3 id="outputTitle"></h3>
+                <div id="outputText"></div>
+            </div>
+            <div id="wordBank"></div>
+            <div id="answerSection"></div>
+        </section>
+        <section>
+            <button id="downloadPdf">Download PDF</button>
+            <button id="printButton" onclick="window.print()">Print</button>
+        </section>
+    </main>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

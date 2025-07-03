@@ -1,0 +1,61 @@
+/* Add your custom styles here */
+
+.settings-group > * + * {
+    margin-top: 1rem;
+}
+
+label[for="gapLength"] {
+    padding-top: 10px;
+}
+
+#outputText {
+    padding-left: 0;
+    white-space: pre-wrap;
+}
+
+#wordSelection {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 1px; /* vertical horizontal */
+}
+
+.word-selection-line-break {
+    flex-basis: 100%; /* Forces the div to take full width, creating a new line */
+    height: 1em; /* Adds vertical spacing */
+}
+
+#wordSelection button {
+    padding: 2px 2px;
+    margin: 0;
+    flex-grow: 0;
+    width: auto;
+    color: var(--pirmary);
+    background-color: transparent;
+    border: none;
+}
+
+h1, h2, h3 {
+    margin-top: 1em;
+    margin-bottom: 0.2em;
+}
+
+.word-bank-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 12px; /* vertical horizontal */
+    border: 1px solid var(--primary);
+    padding: 10px;
+    border-radius: var(--border-radius);
+}
+
+.word-bank-word {
+    /* Removed individual word border */
+    padding: 0;
+    border-radius: 0;
+}
+
+#wordSelection button.secondary {
+    background-color: var(--primary);
+    color: var(--primary-inverse);
+}
