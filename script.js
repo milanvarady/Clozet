@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM elements
     const inputText = document.getElementById('inputText');
     const keepFormatting = document.getElementById('keepFormatting');
     const wordSelection = document.getElementById('wordSelection');
@@ -12,14 +13,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputText = document.getElementById('outputText');
     const wordBank = document.getElementById('wordBank');
     const answerSection = document.getElementById('answerSection');
+    const downloadPdf = document.getElementById('downloadPdf');
+    const printButton = document.getElementById('printButton');
 
+    // State
     let words = [];
     let gappedWords = [];
 
+    // Event listeners
     inputText.addEventListener('input', updateWordSelection);
     worksheetTitle.addEventListener('input', updateOutput);
-
     keepFormatting.addEventListener('change', updateWordSelection);
+    downloadPdf.addEventListener('click', generatePDF);
+
+    [numberGaps, includeWordBank, separateAnswers, gapLength].forEach(el => {
+        el.addEventListener('change', updateOutput);
+    });
+
+    gapLength.addEventListener('input', () => {
+        gapLengthValue.textContent = gapLength.value;
+        updateOutput();
+    });
 
     function updateWordSelection() {
         const text = inputText.value;
@@ -32,36 +46,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Split text while preserving delimiters
         if (keepFormatting.checked) {
-            // Split while keeping delimiters (whitespace, newlines)
             words = text.split(/(\s+|[.!?,])/);
         } else {
-            // Treat as a single line, but still keep spaces and punctuation to preserve them
             words = text.replace(/\n/g, ' ').split(/(\s+|[.!?,])/);
         }
 
-        wordSelection.innerHTML = '';
+        renderWordSelection();
+        updateOutput();
+    }
+
+    function renderWordSelection() {
+        const fragment = document.createDocumentFragment();
+
         words.forEach((word, index) => {
-            // Only create buttons for actual words, not whitespace
             if (word.includes('\n')) {
                 const lineBreak = document.createElement('div');
                 lineBreak.classList.add('word-selection-line-break');
-                wordSelection.appendChild(lineBreak);
+                fragment.appendChild(lineBreak);
             } else if (word && word.trim()) {
                 const button = document.createElement('button');
                 button.textContent = word;
                 button.dataset.index = index;
-                button.addEventListener('click', () => {
-                    toggleGap(word, index, button);
-                });
-                wordSelection.appendChild(button);
+                button.addEventListener('click', () => toggleGap(word, index, button));
+                fragment.appendChild(button);
             }
         });
-        updateOutput();
+
+        wordSelection.innerHTML = '';
+        wordSelection.appendChild(fragment);
     }
 
     function toggleGap(word, index, button) {
         const gappedWordIndex = gappedWords.findIndex(g => g.index === index);
+
         if (gappedWordIndex > -1) {
             gappedWords.splice(gappedWordIndex, 1);
             button.classList.remove('secondary');
@@ -73,39 +92,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateOutput() {
-        const title = worksheetTitle.value.trim();
-        if (title) {
-            outputTitle.textContent = title;
-        } else {
-            outputTitle.textContent = '';
-        }
+        updateTitle();
 
         if (inputText.value.trim() === '') {
-            outputText.innerHTML = '<p>The generated text will appear here.</p>';
-            wordBank.innerHTML = '';
-            answerSection.innerHTML = '';
-            downloadPdf.disabled = true;
-            printButton.disabled = true;
+            showEmptyState();
             return;
         }
 
+        enableButtons();
+        generateOutputText();
+        generateWordBank();
+        generateAnswerSection();
+    }
+
+    function updateTitle() {
+        const title = worksheetTitle.value.trim();
+        outputTitle.textContent = title;
+    }
+
+    function showEmptyState() {
+        outputText.innerHTML = '<p>The generated text will appear here.</p>';
+        wordBank.innerHTML = '';
+        answerSection.innerHTML = '';
+        downloadPdf.disabled = true;
+        printButton.disabled = true;
+    }
+
+    function enableButtons() {
         downloadPdf.disabled = false;
         printButton.disabled = false;
+    }
 
+    function generateOutputText() {
         let outputContent = '';
         let gapCounter = 0;
 
         words.forEach((word, index) => {
             if (word.includes('\n')) {
-                outputContent += word; // Add the newline character itself
+                outputContent += word;
                 return;
             }
 
             const gappedWord = gappedWords.find(g => g.index === index);
-
             if (gappedWord) {
                 gapCounter++;
-                let gap = '_'.repeat(gapLength.value);
+                let gap = '_'.repeat(parseInt(gapLength.value));
                 if (numberGaps.checked) {
                     gap = `(${gapCounter})\u00A0${gap}`;
                 }
@@ -116,50 +147,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         outputText.textContent = outputContent;
-
-        if (includeWordBank.checked && gappedWords.length > 0) {
-            const shuffledWords = [...gappedWords].sort(() => Math.random() - 0.5);
-            wordBank.innerHTML = '<h3>Word Bank</h3><div class="word-bank-words">' + shuffledWords.map(g => `<span class="word-bank-word">${g.word}</span>`).join(' / ') + '</div>';
-        } else {
-            wordBank.innerHTML = '';
-        }
-
-        if (separateAnswers.checked && gappedWords.length > 0) {
-            let answers = '<h3>Answer Section</h3>';
-            for (let i = 0; i < gappedWords.length; i++) {
-                answers += `<p>${numberGaps.checked ? `(${i + 1})` : ''} __________________</p>`;
-            }
-            answerSection.innerHTML = answers;
-        } else {
-            answerSection.innerHTML = '';
-        }
     }
 
-    const downloadPdf = document.getElementById('downloadPdf');
-    const printButton = document.getElementById('printButton');
+    function generateWordBank() {
+        if (!includeWordBank.checked || gappedWords.length === 0) {
+            wordBank.innerHTML = '';
+            return;
+        }
 
-    downloadPdf.addEventListener('click', () => {
+        const shuffledWords = [...gappedWords].sort(() => Math.random() - 0.5);
+        const wordBankHtml = shuffledWords.map(g => `<span class="word-bank-word">${g.word}</span>`).join(' / ');
+        wordBank.innerHTML = `<h3>Word Bank</h3><div class="word-bank-words">${wordBankHtml}</div>`;
+    }
+
+    function generateAnswerSection() {
+        if (!separateAnswers.checked || gappedWords.length === 0) {
+            answerSection.innerHTML = '';
+            return;
+        }
+
+        let answers = '<h3>Answer Section</h3>';
+        for (let i = 0; i < gappedWords.length; i++) {
+            const prefix = numberGaps.checked ? `(${i + 1})` : '';
+            answers += `<p>${prefix} __________________</p>`;
+        }
+        answerSection.innerHTML = answers;
+    }
+
+    function generatePDF() {
         const { jsPDF } = window.jspdf;
-
-        // Create new PDF document
         const doc = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
             format: 'a4'
         });
 
-        // Page dimensions
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
         const maxWidth = pageWidth - (margin * 2);
-
         let yPosition = margin;
 
-        // Helper function to add text with word wrapping and custom line spacing
         function addWrappedText(text, x, y, maxWidth, lineHeight = 6) {
             const lines = doc.splitTextToSize(text, maxWidth);
-            const lineSpacing = 6; // Increased from default 6 for better readability
+            const lineSpacing = 6;
 
             lines.forEach((line, index) => {
                 doc.text(line, x, y + (index * lineSpacing));
@@ -168,7 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return y + (lines.length * lineSpacing);
         }
 
-        // Helper function to check if we need a new page
         function checkNewPage(currentY, spaceNeeded = 20) {
             if (currentY + spaceNeeded > pageHeight - margin) {
                 doc.addPage();
@@ -178,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // Add title if exists
+            // Add title
             const title = worksheetTitle.value.trim();
             if (title) {
                 doc.setFontSize(16);
@@ -187,111 +217,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 yPosition += 4;
             }
 
-            // Set normal font for body text
+            // Add main content
             doc.setFontSize(12);
             doc.setFont(undefined, 'normal');
 
-            // Get the output text content
             const outputTextContent = outputText.textContent;
-
             if (outputTextContent && outputTextContent.trim()) {
-                // Split text into lines while preserving the structure
                 const lines = outputTextContent.split('\n');
-
                 for (let line of lines) {
                     if (line.trim()) {
                         yPosition = checkNewPage(yPosition);
                         yPosition = addWrappedText(line, margin, yPosition, maxWidth);
-                        yPosition += 3; // Small gap between lines
+                        yPosition += 3;
                     } else {
-                        yPosition += 6; // Larger gap for empty lines
+                        yPosition += 6;
                     }
                 }
             }
 
-            yPosition += 10; // Space before word bank
+            yPosition += 10;
 
-            // Add Word Bank if it exists
-            const wordBankContent = wordBank.innerHTML;
-            if (wordBankContent && wordBankContent.trim()) {
-                yPosition = checkNewPage(yPosition, 30);
+            // Add Word Bank
+            yPosition = addWordBankToPDF(doc, yPosition, margin, maxWidth, checkNewPage);
 
-                // Word Bank title
-                doc.setFontSize(14);
-                doc.setFont(undefined, 'bold');
-                doc.text('Word Bank', margin, yPosition);
-                yPosition += 4;
+            // Add Answer Section
+            yPosition = addAnswerSectionToPDF(doc, yPosition, margin, checkNewPage);
 
-                // Get words from word bank
-                const wordBankWords = wordBank.querySelector('.word-bank-words');
-                if (wordBankWords) {
-                    const words = Array.from(wordBankWords.children)
-                        .map(span => span.textContent.trim())
-                        .filter(word => word);
-
-                    if (words.length > 0) {
-                        const wordText = words.join(' / ');
-
-                        // Set font for the word bank
-                        doc.setFontSize(12);
-                        doc.setFont(undefined, 'normal');
-                        const textLines = doc.splitTextToSize(wordText, maxWidth - 10);
-
-                        const lineSpacing = 6; // The desired space between the baseline of each line in mm
-                        const borderPadding = 4; // A balanced padding for inside the box
-                        const fontHeightApproximation = 4; // An approximation for the height of 12pt characters in mm
-
-                        // 1. Correctly calculate the actual height of the text block
-                        const textBlockHeight = ((textLines.length - 1) * lineSpacing) + fontHeightApproximation;
-
-                        // 2. Calculate the border height based on the correct text height and padding
-                        const borderHeight = textBlockHeight + (borderPadding * 2);
-
-                        // Draw the correctly sized border
-                        doc.roundedRect(margin, yPosition, maxWidth, borderHeight, 2, 2);
-
-                        // Define where the text should start inside the border
-                        const textStartX = margin + borderPadding;
-                        const textStartY = yPosition + borderPadding + fontHeightApproximation;
-
-                        // 3. Render each line manually to ensure our 'lineSpacing' is used
-                        textLines.forEach((line, index) => {
-                            doc.text(line, textStartX, textStartY + (index * lineSpacing));
-                        });
-
-                        // Update the yPosition for the next element on the page
-                        yPosition += borderHeight + 10;
-                    }
-                }
-            }
-
-            // Add Answer Section if it exists
-            const answerSectionContent = answerSection.innerHTML;
-            if (answerSectionContent && answerSectionContent.trim()) {
-                yPosition = checkNewPage(yPosition, 30);
-
-                // Answer Section title
-                doc.setFontSize(14);
-                doc.setFont(undefined, 'bold');
-                doc.text('Answer Section', margin, yPosition);
-                yPosition += 8;
-
-                // Get answer lines
-                const answerPs = answerSection.querySelectorAll('p');
-                doc.setFontSize(12);
-                doc.setFont(undefined, 'normal');
-
-                answerPs.forEach(p => {
-                    yPosition = checkNewPage(yPosition);
-                    const answerText = p.textContent.trim();
-                    if (answerText) {
-                        doc.text(answerText, margin, yPosition);
-                        yPosition += 10;
-                    }
-                });
-            }
-
-            // Save the PDF
+            // Save PDF
             const filename = title ? `${title}.pdf` : 'cloze-test.pdf';
             doc.save(filename);
 
@@ -299,18 +251,81 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('PDF generation failed:', error);
             alert('Failed to generate PDF. Error: ' + error.message);
         }
-    });
+    }
 
-    [numberGaps, includeWordBank, separateAnswers, gapLength].forEach(el => {
-        el.addEventListener('change', updateOutput);
-    });
+    function addWordBankToPDF(doc, yPosition, margin, maxWidth, checkNewPage) {
+        const wordBankContent = wordBank.innerHTML;
+        if (!wordBankContent || !wordBankContent.trim()) return yPosition;
 
-    gapLength.addEventListener('input', () => {
-        gapLengthValue.textContent = gapLength.value;
-        updateOutput();
-    });
+        yPosition = checkNewPage(yPosition, 30);
 
-    // Initial update to reflect default settings
-    updateWordSelection();
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text('Word Bank', margin, yPosition);
+        yPosition += 4;
+
+        const wordBankWords = wordBank.querySelector('.word-bank-words');
+        if (wordBankWords) {
+            const words = Array.from(wordBankWords.children)
+                .map(span => span.textContent.trim())
+                .filter(word => word);
+
+            if (words.length > 0) {
+                const wordText = words.join(' / ');
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+
+                const textLines = doc.splitTextToSize(wordText, maxWidth - 10);
+                const lineSpacing = 6;
+                const borderPadding = 4;
+                const fontHeightApproximation = 4;
+                const textBlockHeight = ((textLines.length - 1) * lineSpacing) + fontHeightApproximation;
+                const borderHeight = textBlockHeight + (borderPadding * 2);
+
+                doc.roundedRect(margin, yPosition, maxWidth, borderHeight, 2, 2);
+
+                const textStartX = margin + borderPadding;
+                const textStartY = yPosition + borderPadding + fontHeightApproximation;
+
+                textLines.forEach((line, index) => {
+                    doc.text(line, textStartX, textStartY + (index * lineSpacing));
+                });
+
+                yPosition += borderHeight + 10;
+            }
+        }
+
+        return yPosition;
+    }
+
+    function addAnswerSectionToPDF(doc, yPosition, margin, checkNewPage) {
+        const answerSectionContent = answerSection.innerHTML;
+        if (!answerSectionContent || !answerSectionContent.trim()) return yPosition;
+
+        yPosition = checkNewPage(yPosition, 30);
+
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text('Answer Section', margin, yPosition);
+        yPosition += 8;
+
+        const answerPs = answerSection.querySelectorAll('p');
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+
+        answerPs.forEach(p => {
+            yPosition = checkNewPage(yPosition);
+            const answerText = p.textContent.trim();
+            if (answerText) {
+                doc.text(answerText, margin, yPosition);
+                yPosition += 10;
+            }
+        });
+
+        return yPosition;
+    }
+
+    // Initialize
     gapLengthValue.textContent = gapLength.value;
+    updateWordSelection();
 });
