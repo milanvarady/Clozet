@@ -106,8 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateTitle() {
-        const title = worksheetTitle.value.trim();
-        outputTitle.textContent = title;
+        outputTitle.textContent = worksheetTitle.value.trim();
     }
 
     function showEmptyState() {
@@ -174,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         answerSection.innerHTML = answers;
     }
 
-    function generatePDF() {
+    async function generatePDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({
             orientation: 'portrait',
@@ -205,6 +204,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return margin;
             }
             return currentY;
+        }
+
+        // Function to detect if we're on a mobile device
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
         }
 
         try {
@@ -243,8 +248,42 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add Answer Section
             yPosition = addAnswerSectionToPDF(doc, yPosition, margin, checkNewPage);
 
-            // Save PDF
+            // Generate filename
             const filename = title ? `${title}.pdf` : 'cloze-test.pdf';
+
+            // Check if we should use Web Share API (mobile devices only)
+            if (isMobileDevice() && navigator.share) {
+                try {
+                    // Create blob from PDF
+                    const pdfOutput = doc.output('blob');
+                    const pdfBlob = new Blob([pdfOutput], { type: 'application/pdf' });
+                    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+                    // Check if we can share files
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: title || 'Cloze Test',
+                            text: 'Created with Clozet',
+                            files: [file]
+                        });
+                        return; // Exit early if sharing succeeded
+                    } else {
+                        // Fallback to sharing without file if file sharing isn't supported
+                        const pdfDataUrl = doc.output('datauristring');
+                        await navigator.share({
+                            title: title || 'Cloze Test',
+                            text: 'Created with Clozet',
+                            url: pdfDataUrl
+                        });
+                        return;
+                    }
+                } catch (shareError) {
+                    console.log('Share cancelled or failed:', shareError);
+                    // Fall through to download
+                }
+            }
+
+            // Fallback to download for desktop or if sharing failed
             doc.save(filename);
 
         } catch (error) {
