@@ -188,12 +188,20 @@ export class PDFGenerator {
                     return;
                 }
             } catch (shareError) {
-                console.log('Share cancelled or failed:', shareError);
-                // Fall through to download
+                console.log('Share error:', shareError);
+
+                // Check if the error is due to user cancellation
+                if (shareError.name === 'AbortError') {
+                    console.log('Share was cancelled by user');
+                    return; // Exit without downloading
+                }
+
+                // For other errors (e.g., not supported), fall through to download
+                console.log('Share failed, falling back to download');
             }
         }
 
-        // Fallback to download for desktop or if sharing failed
+        // Fallback to download for desktop or if sharing failed (but not cancelled)
         doc.save(filename);
     }
 }
