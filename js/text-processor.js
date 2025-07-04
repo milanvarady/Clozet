@@ -7,12 +7,4 @@ export class TextProcessor {
             return text.replace(/\n/g, ' ').split(/(\s+|[.!?,])/);
         }
     }
-
-    hasLineBreak(word) {
-        return word.includes('\n');
-    }
-
-    isValidWord(word) {
-        return word && word.trim();
-    }
 }

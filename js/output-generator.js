@@ -46,7 +46,7 @@ export class OutputGenerator {
         let answers = '<h3>Answer Section</h3>';
         for (let i = 0; i < gappedWords.length; i++) {
             const prefix = numberGaps ? `(${i + 1})` : '';
-            answers += `<p>${prefix} __________________</p>`;
+            answers += `<p>${prefix} ____________________________</p>`;
         }
         
         return answers;
