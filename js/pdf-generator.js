@@ -154,8 +154,20 @@ export class PDFGenerator {
     }
 
     isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-               (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
+        // Primary mobile detection using user agent
+        const userAgentMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Modern approach: Use userAgentData if available, with fallback to userAgent
+        let platformMobile = false;
+        if (navigator.userAgentData && navigator.userAgentData.mobile) {
+            platformMobile = true;
+        } else if (navigator.userAgent) {
+            // Check for iPad specifically (often reports as desktop in userAgent)
+            // Modern iPads may not be detected by the regex above
+            platformMobile = navigator.userAgent.includes('Mac') && navigator.maxTouchPoints && navigator.maxTouchPoints > 2;
+        }
+        
+        return userAgentMobile || platformMobile;
     }
 
     async handleOutput(doc, title) {
