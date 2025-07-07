@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Create fill-in-the-blank handouts or cloze tests with this simple free tool.">
+    <meta name="description" content="Create fill-in-the-blank handouts or cloze tests with this simple, free tool.">
     <title>Clozet</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="print.css" media="print">
+    <link rel="stylesheet" href="css/pico.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/print.css" media="print">
 </head>
 <body>
     <main class="container">
@@ -58,11 +58,13 @@
             <div id="wordBank"></div>
             <div id="answerSection"></div>
         </section>
-        <section>
-            <button id="downloadPdf">📄 Download PDF</button>
-            <button id="downloadDocx">📝 Download DOCX</button>
-            <button id="copyText">📋 Copy Plain Text</button>
-            <button id="printButton" onclick="window.print()">🖨️ Print</button>
+        <section id="saveSection">
+            <div class="grid">
+                <button id="downloadPdf">📄 Download PDF</button>
+                <button id="downloadDocx">📝 Download DOCX</button>
+                <button id="copyText">📋 Copy Plain Text</button>
+                <button id="printButton" onclick="window.print()">🖨️ Print</button>
+            </div>
         </section>
     </main>
     <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
