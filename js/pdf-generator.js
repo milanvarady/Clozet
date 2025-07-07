@@ -1,3 +1,5 @@
+import { Utils } from './utils.js';
+
 export class PDFGenerator {
     async generate(title, outputText, wordBankElement, answerSectionElement) {
         const { jsPDF } = window.jspdf;
@@ -69,15 +71,9 @@ export class PDFGenerator {
         doc.text('Word Bank', margin, yPosition);
         yPosition += 4;
 
-        const wordBankWords = wordBankElement.querySelector('.word-bank-words');
-        if (wordBankWords) {
-            const words = Array.from(wordBankWords.children)
-                .map(span => span.textContent.trim())
-                .filter(word => word);
-
-            if (words.length > 0) {
-                yPosition = this.addWordBankBox(doc, words, margin, yPosition, maxWidth);
-            }
+        const words = Utils.extractWordBankWords(wordBankElement);
+        if (words.length > 0) {
+            yPosition = this.addWordBankBox(doc, words, margin, yPosition, maxWidth);
         }
 
         return yPosition;
@@ -154,20 +150,7 @@ export class PDFGenerator {
     }
 
     isMobileDevice() {
-        // Primary mobile detection using user agent
-        const userAgentMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Modern approach: Use userAgentData if available, with fallback to userAgent
-        let platformMobile = false;
-        if (navigator.userAgentData && navigator.userAgentData.mobile) {
-            platformMobile = true;
-        } else if (navigator.userAgent) {
-            // Check for iPad specifically (often reports as desktop in userAgent)
-            // Modern iPads may not be detected by the regex above
-            platformMobile = navigator.userAgent.includes('Mac') && navigator.maxTouchPoints && navigator.maxTouchPoints > 2;
-        }
-        
-        return userAgentMobile || platformMobile;
+        return Utils.isMobileDevice();
     }
 
     async handleOutput(doc, title) {

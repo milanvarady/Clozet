@@ -1,3 +1,5 @@
+import { Utils } from './utils.js';
+
 export class DOCXGenerator {
     async generate(title, outputText, wordBankElement, answerSectionElement) {
         // Create DOCX document using docx library
@@ -43,19 +45,13 @@ export class DOCXGenerator {
                 })
             );
             
-            const wordBankWords = wordBankElement.querySelector('.word-bank-words');
-            if (wordBankWords) {
-                const words = Array.from(wordBankWords.children)
-                    .map(span => span.textContent.trim())
-                    .filter(word => word);
-                
-                if (words.length > 0) {
-                    children.push(
-                        new Paragraph({
-                            text: words.join(' / '),
-                        })
-                    );
-                }
+            const words = Utils.extractWordBankWords(wordBankElement);
+            if (words.length > 0) {
+                children.push(
+                    new Paragraph({
+                        text: words.join(' / '),
+                    })
+                );
             }
         }
 
@@ -97,20 +93,7 @@ export class DOCXGenerator {
     }
 
     isMobileDevice() {
-        // Primary mobile detection using user agent
-        const userAgentMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Modern approach: Use userAgentData if available, with fallback to userAgent
-        let platformMobile = false;
-        if (navigator.userAgentData && navigator.userAgentData.mobile) {
-            platformMobile = true;
-        } else if (navigator.userAgent) {
-            // Check for iPad specifically (often reports as desktop in userAgent)
-            // Modern iPads may not be detected by the regex above
-            platformMobile = navigator.userAgent.includes('Mac') && navigator.maxTouchPoints && navigator.maxTouchPoints > 2;
-        }
-        
-        return userAgentMobile || platformMobile;
+        return Utils.isMobileDevice();
     }
 
     async handleOutput(docxBlob, title) {

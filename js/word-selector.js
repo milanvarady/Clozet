@@ -1,13 +1,10 @@
-import { DOMManager } from './dom-manager.js';
-
 export class WordSelector {
     constructor() {
-        this.domManager = new DOMManager();
         this.selectedWords = new Set();
     }
 
     render(words, toggleCallback) {
-        const wordSelectionElement = this.domManager.getWordSelectionElement();
+        const wordSelectionElement = document.getElementById('wordSelection');
         const fragment = document.createDocumentFragment();
 
         words.forEach((word, index) => {

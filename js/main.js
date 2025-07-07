@@ -9,7 +9,6 @@ import { TextCopyGenerator } from './text-copy-generator.js';
 class ClozetApp {
     constructor() {
         this.domManager = new DOMManager();
-        this.textProcessor = new TextProcessor();
         this.wordSelector = new WordSelector();
         this.outputGenerator = new OutputGenerator();
         this.pdfGenerator = new PDFGenerator();
@@ -61,7 +60,7 @@ class ClozetApp {
             return;
         }
 
-        this.state.words = this.textProcessor.splitText(text, this.domManager.getKeepFormatting());
+        this.state.words = TextProcessor.splitText(text, this.domManager.getKeepFormatting());
         this.wordSelector.render(this.state.words, (word, index) => this.toggleGap(word, index));
         this.updateOutput();
     }
@@ -112,14 +111,19 @@ class ClozetApp {
         this.domManager.updateOutput(outputText, wordBank, answerSection);
     }
 
+    getDocumentData() {
+        return {
+            title: this.domManager.getWorksheetTitle(),
+            outputText: this.domManager.getOutputText(),
+            wordBank: this.domManager.getWordBankElement(),
+            answerSection: this.domManager.getAnswerSectionElement()
+        };
+    }
+
     async generatePDF() {
         try {
-            const title = this.domManager.getWorksheetTitle();
-            const outputText = this.domManager.getOutputText();
-            const wordBank = this.domManager.getWordBankElement();
-            const answerSection = this.domManager.getAnswerSectionElement();
-
-            await this.pdfGenerator.generate(title, outputText, wordBank, answerSection);
+            const data = this.getDocumentData();
+            await this.pdfGenerator.generate(data.title, data.outputText, data.wordBank, data.answerSection);
         } catch (error) {
             console.error('PDF generation failed:', error);
             alert('Failed to generate PDF. Error: ' + error.message);
@@ -128,12 +132,8 @@ class ClozetApp {
 
     async generateDOCX() {
         try {
-            const title = this.domManager.getWorksheetTitle();
-            const outputText = this.domManager.getOutputText();
-            const wordBank = this.domManager.getWordBankElement();
-            const answerSection = this.domManager.getAnswerSectionElement();
-
-            await this.docxGenerator.generate(title, outputText, wordBank, answerSection);
+            const data = this.getDocumentData();
+            await this.docxGenerator.generate(data.title, data.outputText, data.wordBank, data.answerSection);
         } catch (error) {
             console.error('DOCX generation failed:', error);
             alert('Failed to generate DOCX. Error: ' + error.message);
@@ -142,12 +142,8 @@ class ClozetApp {
 
     async copyText() {
         try {
-            const title = this.domManager.getWorksheetTitle();
-            const outputText = this.domManager.getOutputText();
-            const wordBank = this.domManager.getWordBankElement();
-            const answerSection = this.domManager.getAnswerSectionElement();
-
-            await this.textCopyGenerator.copyToClipboard(title, outputText, wordBank, answerSection);
+            const data = this.getDocumentData();
+            await this.textCopyGenerator.copyToClipboard(data.title, data.outputText, data.wordBank, data.answerSection);
         } catch (error) {
             console.error('Copy text failed:', error);
             // Error message is already shown by textCopyGenerator

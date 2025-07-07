@@ -1,3 +1,5 @@
+import { Utils } from './utils.js';
+
 export class TextCopyGenerator {
     async copyToClipboard(title, outputText, wordBankElement, answerSectionElement) {
         try {
@@ -34,15 +36,9 @@ export class TextCopyGenerator {
         if (wordBankElement && wordBankElement.innerHTML.trim()) {
             text += 'Word Bank\n';
             
-            const wordBankWords = wordBankElement.querySelector('.word-bank-words');
-            if (wordBankWords) {
-                const words = Array.from(wordBankWords.children)
-                    .map(span => span.textContent.trim())
-                    .filter(word => word);
-                
-                if (words.length > 0) {
-                    text += `${words.join(' / ')}\n\n`;
-                }
+            const words = Utils.extractWordBankWords(wordBankElement);
+            if (words.length > 0) {
+                text += `${words.join(' / ')}\n\n`;
             }
         }
 
@@ -90,42 +86,10 @@ export class TextCopyGenerator {
     }
 
     showCopySuccess() {
-        // Show a temporary success message
-        this.showTemporaryMessage('✅ Text copied to clipboard!', 'success');
+        Utils.showTemporaryMessage('✅ Text copied to clipboard!', 'success');
     }
 
     showCopyError() {
-        // Show a temporary error message
-        this.showTemporaryMessage('❌ Failed to copy text. Please try again.', 'error');
-    }
-
-    showTemporaryMessage(message, type) {
-        // Create a temporary message element
-        const messageEl = document.createElement('div');
-        messageEl.textContent = message;
-        messageEl.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 16px;
-            border-radius: 4px;
-            color: white;
-            font-weight: bold;
-            z-index: 10000;
-            transition: opacity 0.3s ease;
-            ${type === 'success' ? 'background-color: #28a745;' : 'background-color: #dc3545;'}
-        `;
-        
-        document.body.appendChild(messageEl);
-        
-        // Remove the message after 3 seconds
-        setTimeout(() => {
-            messageEl.style.opacity = '0';
-            setTimeout(() => {
-                if (messageEl.parentNode) {
-                    messageEl.parentNode.removeChild(messageEl);
-                }
-            }, 300);
-        }, 3000);
+        Utils.showTemporaryMessage('❌ Failed to copy text. Please try again.', 'error');
     }
 }
