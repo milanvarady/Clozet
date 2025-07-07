@@ -15,6 +15,8 @@ export class DOMManager {
             wordBank: document.getElementById('wordBank'),
             answerSection: document.getElementById('answerSection'),
             downloadPdf: document.getElementById('downloadPdf'),
+            downloadDocx: document.getElementById('downloadDocx'),
+            copyText: document.getElementById('copyText'),
             printButton: document.getElementById('printButton')
         };
     }
@@ -69,11 +71,15 @@ export class DOMManager {
         this.elements.wordBank.innerHTML = '';
         this.elements.answerSection.innerHTML = '';
         this.elements.downloadPdf.disabled = true;
+        this.elements.downloadDocx.disabled = true;
+        this.elements.copyText.disabled = true;
         this.elements.printButton.disabled = true;
     }
 
     enableButtons() {
         this.elements.downloadPdf.disabled = false;
+        this.elements.downloadDocx.disabled = false;
+        this.elements.copyText.disabled = false;
         this.elements.printButton.disabled = false;
     }
 
