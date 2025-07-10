@@ -92,6 +92,11 @@ hr {
     margin-top: 1.4em;
 }
 
+#titleAndGapLengthContainer {
+    margin-top: 1em;
+    align-items: center;
+}
+
 /* --- Footer --- */
 footer {
     margin-top: 4em;

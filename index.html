@@ -62,13 +62,14 @@
                         <input type="checkbox" id="separateAnswers"> Separate answers section
                     </label>
                 </div>
-                <div>
-                    <label for="gapLength">Gap length: <span id="gapLengthValue">10</span></label>
-                    <input type="range" id="gapLength" min="5" max="20" value="10">
-                </div>
-                <div>
-                    <label for="worksheetTitle">Worksheet title</label>
-                    <input type="text" id="worksheetTitle" placeholder="Enter title (optional)">
+                <div class="grid" id="titleAndGapLengthContainer">
+                    <label>
+                        <input type="text" id="worksheetTitle" placeholder="Worksheet title (optional)">
+                    </label>
+                    <div>
+                        <label for="gapLength">Gap length: <span id="gapLengthValue">10</span></label>
+                        <input type="range" id="gapLength" min="5" max="20" value="10">
+                    </div>
                 </div>
             </div>
         </section>
