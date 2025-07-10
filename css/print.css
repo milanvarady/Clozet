@@ -15,14 +15,20 @@ main.container {
     margin: 0;
 }
 
-footer {
-    display: none;
+article {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
 }
 
 /* Hide elements not needed for printing */
 section:not(#outputSection),
 h1,
 h2,
+footer,
+hr,
 #gapNumbers {
     display: none;
 }

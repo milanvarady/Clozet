@@ -17,7 +17,8 @@ class ClozetApp {
 
         this.state = {
             words: [],
-            gappedWords: []
+            gappedWords: [],
+            ranges: new Map() // Track ranges for variable gap lengths
         };
 
         this.init();
@@ -61,17 +62,17 @@ class ClozetApp {
         }
 
         this.state.words = TextProcessor.splitText(text, this.domManager.getKeepFormatting());
-        this.wordSelector.render(this.state.words, (word, index) => this.toggleGap(word, index));
+        this.wordSelector.render(this.state.words, (word, index, rangeId) => this.toggleGap(word, index, rangeId));
         this.updateOutput();
     }
 
-    toggleGap(word, index) {
+    toggleGap(word, index, rangeId = false) {
         const gappedWordIndex = this.state.gappedWords.findIndex(g => g.index === index);
 
         if (gappedWordIndex > -1) {
             this.state.gappedWords.splice(gappedWordIndex, 1);
         } else {
-            this.state.gappedWords.push({ word, index });
+            this.state.gappedWords.push({ word, index, isRange: rangeId });
         }
         this.updateOutput();
     }

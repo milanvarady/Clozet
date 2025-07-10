@@ -67,7 +67,7 @@ export class DOMManager {
     }
 
     showEmptyState() {
-        this.elements.outputText.innerHTML = '<p>The generated text will appear here.</p>';
+        this.elements.outputText.innerHTML = '<p id="outputPlaceholder">The generated text will appear here.</p>';
         this.elements.wordBank.innerHTML = '';
         this.elements.answerSection.innerHTML = '';
         this.elements.downloadPdf.disabled = true;

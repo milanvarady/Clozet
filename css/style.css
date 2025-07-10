@@ -1,13 +1,4 @@
-.settings-group > * + * {
-    margin-top: 1rem;
-}
-
-label[for="gapLength"] {
-    padding-top: 10px;
-}
-
 #outputText {
-    padding-left: 0;
     white-space: pre-wrap;
 }
 
@@ -15,7 +6,7 @@ label[for="gapLength"] {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 2px 1px; /* vertical horizontal */
+    gap: 2px 0; /* vertical horizontal */
 }
 
 .word-selection-line-break {
@@ -38,9 +29,14 @@ label[for="gapLength"] {
     color: var(--pico-primary-inverse);
 }
 
-h1, h2, h3 {
-    margin-top: 1em;
-    margin-bottom: 0.2em;
+#wordSelection button.range-selected {
+    background-color: var(--pico-secondary);
+    color: var(--pico-secondary-inverse);
+    border-radius: 0;
+}
+
+#wordSelection p {
+    margin: 0;
 }
 
 .word-bank-words {
@@ -61,12 +57,30 @@ h1, h2, h3 {
 .warning {
     font-style: italic;
     font-size: 0.9em;
-    margin-top: -0.6em;
+    margin-top: -1em;
     margin-bottom: 1em;
+}
+
+#outputContainer h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#wordBank h3, #answerSection h3 {
+    margin-top: 1em;
+    margin-bottom: 0.3em;
 }
 
 #saveSection {
     margin-top: 2em;
+}
+
+#selectRanges {
+    margin-top: 1.4em;
+}
+
+#outputPlaceholder {
+    margin: 0;
 }
 
 footer {

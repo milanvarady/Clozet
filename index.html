@@ -21,11 +21,23 @@
                 Keep original format
             </label>
         </section>
+        <hr/>
         <section>
             <h2>Select words to hide</h2>
             <p class="warning">(Selection will be lost if you edit the source text)</p>
-            <div id="wordSelection" class="grid"></div>
+            <article>
+                <div id="wordSelection" class="grid"></div>
+            </article>
+            <details id="selectRanges">
+              <summary>How to select ranges? (click to expand)</summary>
+                <p>
+                    To select a range, such as a whole sentence, first select the beginning of the range.
+                    Then, while holding the Shift key, select the end of the range. To remove a range, click on it.
+                </p>
+                <P>Note that punctuation marks are individual units and must be selected separately.</P>
+            </details>
         </section>
+        <hr/>
         <section>
             <h2>Settings</h2>
             <div class="settings-group">
@@ -50,14 +62,17 @@
                 </div>
             </div>
         </section>
+        <hr/>
         <section id="outputSection">
             <h2>Output</h2>
-            <div id="outputContainer">
-                <h3 id="outputTitle"></h3>
-                <div id="outputText"></div>
-            </div>
-            <div id="wordBank"></div>
-            <div id="answerSection"></div>
+            <article id="output">
+                <div id="outputContainer">
+                    <h3 id="outputTitle"></h3>
+                    <div id="outputText"></div>
+                </div>
+                <div id="wordBank"></div>
+                <div id="answerSection"></div>
+            </article>
         </section>
         <section id="saveSection">
             <div class="grid">
