@@ -48,6 +48,14 @@ class ClozetApp {
             this.domManager.updateGapLengthDisplay();
             this.updateOutput();
         });
+
+        // Range mode toggle for mobile support
+        const rangeModeToggle = document.getElementById('rangeMode');
+        if (rangeModeToggle) {
+            rangeModeToggle.addEventListener('change', () => {
+                this.wordSelector.setRangeMode(rangeModeToggle.checked);
+            });
+        }
     }
 
     updateWordSelection() {

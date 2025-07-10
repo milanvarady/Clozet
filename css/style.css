@@ -1,7 +1,4 @@
-#outputText {
-    white-space: pre-wrap;
-}
-
+/* --- Layout and Structure --- */
 #wordSelection {
     display: flex;
     flex-wrap: wrap;
@@ -14,6 +11,51 @@
     height: 1em; /* Adds vertical spacing */
 }
 
+.word-bank-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 12px; /* vertical horizontal */
+    border: 1px solid var(--pico-primary);
+    padding: 10px;
+    border-radius: var(--pico-border-radius);
+}
+
+hr {
+    margin: 1.5em 0;
+}
+
+/* --- Typography and Text --- */
+#outputText {
+    white-space: pre-wrap;
+}
+
+#wordSelection p {
+    margin: 0;
+}
+
+.warning {
+    font-style: italic;
+    font-size: 0.9em;
+    margin-top: -1em;
+    margin-bottom: 1em;
+}
+
+#outputPlaceholder {
+    margin: 0;
+}
+
+/* --- Headings --- */
+#outputContainer h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#wordBank h3, #answerSection h3 {
+    margin-top: 1em;
+    margin-bottom: 0.3em;
+}
+
+/* --- Buttons --- */
 #wordSelection button {
     padding: 2px 2px;
     margin: 0;
@@ -35,42 +77,13 @@
     border-radius: 0;
 }
 
-#wordSelection p {
-    margin: 0;
-}
-
-.word-bank-words {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px 12px; /* vertical horizontal */
-    border: 1px solid var(--pico-primary);
-    padding: 10px;
-    border-radius: var(--pico-border-radius);
-}
-
 .word-bank-word {
     /* Removed individual word border */
     padding: 0;
     border-radius: 0;
 }
 
-.warning {
-    font-style: italic;
-    font-size: 0.9em;
-    margin-top: -1em;
-    margin-bottom: 1em;
-}
-
-#outputContainer h3 {
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-#wordBank h3, #answerSection h3 {
-    margin-top: 1em;
-    margin-bottom: 0.3em;
-}
-
+/* --- Sections and Spacing --- */
 #saveSection {
     margin-top: 2em;
 }
@@ -79,10 +92,7 @@
     margin-top: 1.4em;
 }
 
-#outputPlaceholder {
-    margin: 0;
-}
-
+/* --- Footer --- */
 footer {
     margin-top: 4em;
 }
@@ -91,6 +101,7 @@ footer p {
     font-size: 0.8em;
 }
 
+/* --- Specific Elements --- */
 #keepFormattingLabel {
     border-bottom: none;
     cursor: pointer;

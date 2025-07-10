@@ -4,6 +4,16 @@ export class WordSelector {
         this.lastSelectedIndex = null;
         this.ranges = new Map(); // Map to track ranges: key is range id, value is {start, end}
         this.rangeCounter = 0;
+        this.rangeModeEnabled = false;
+    }
+
+    setRangeMode(enabled) {
+        this.rangeModeEnabled = enabled;
+        
+        // Clear lastSelectedIndex when switching to range mode
+        if (enabled) {
+            this.lastSelectedIndex = null;
+        }
     }
 
     render(words, toggleCallback) {
@@ -40,15 +50,21 @@ export class WordSelector {
             const isSelected = this.selectedWords.has(index);
             const shiftKeyPressed = event.shiftKey;
             
-            if (shiftKeyPressed && this.lastSelectedIndex !== null) {
+            if ((shiftKeyPressed || this.rangeModeEnabled) && this.lastSelectedIndex !== null) {
                 this.handleRangeSelection(index, toggleCallback);
+                // Reset lastSelectedIndex after range creation in range mode
+                if (this.rangeModeEnabled) {
+                    this.lastSelectedIndex = null;
+                } else {
+                    this.lastSelectedIndex = index;
+                }
             } else if (isSelected) {
                 this.deselectWord(index, button, toggleCallback);
+                this.lastSelectedIndex = index;
             } else {
                 this.selectWord(word, index, button, toggleCallback);
+                this.lastSelectedIndex = index;
             }
-            
-            this.lastSelectedIndex = index;
         });
         
         return button;
