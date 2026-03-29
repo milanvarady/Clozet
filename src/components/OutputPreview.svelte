@@ -1,5 +1,8 @@
 <script lang="ts">
   import { getGapOutputData, getTokens, store } from '../lib/state.svelte';
+  import TrailingSpace from './TrailingSpace.svelte';
+
+  let gapData = $derived(getGapOutputData());
 </script>
 
 <section>
@@ -21,18 +24,12 @@
       <div class="worksheet-text">
         {#each getTokens() as token}
           <span>{token.text}</span>
-          {#if token.trailingSpace.includes('\n')}
-            {#each token.trailingSpace.match(/\n/g) ?? [] as _}
-              <br />
-            {/each}
-          {:else if token.trailingSpace}
-            {' '}
-          {/if}
+          <TrailingSpace trailingSpace={token.trailingSpace} />
         {/each}
       </div>
     {:else}
       <div class="worksheet-text">
-        {#each getGapOutputData().items as item}
+        {#each gapData.items as item}
           {#if item.type === 'text'}
             <span>{item.content}</span>
           {:else if item.type === 'newline'}
@@ -45,29 +42,26 @@
         {/each}
       </div>
 
-      {#if store.settings.includeWordBank && getGapOutputData().wordBank.length > 0}
+      {#if store.settings.includeWordBank && gapData.wordBank.length > 0}
         <div class="word-bank mt-6 rounded border border-gray-300 p-4">
           <h3 class="mb-2 text-sm font-semibold text-gray-700 uppercase">
             Word Bank
           </h3>
-          <p class="text-sm leading-relaxed">
-            {#each getGapOutputData().wordBank as word, i}
-              <span class="mx-2 inline-block">{word}</span>
-              {#if i < getGapOutputData().wordBank.length - 1}
-                <span class="text-gray-300">|</span>
-              {/if}
+          <div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3 md:grid-cols-4">
+            {#each gapData.wordBank as word}
+              <span class="py-0.5 text-center">{word}</span>
             {/each}
-          </p>
+          </div>
         </div>
       {/if}
 
-      {#if store.settings.includeAnswerSection && getGapOutputData().answers.length > 0}
+      {#if store.settings.includeAnswerSection && gapData.answers.length > 0}
         <div class="answer-section mt-6 border-t border-gray-300 pt-4">
           <h3 class="mb-3 text-sm font-semibold text-gray-700 uppercase">
             Answers
           </h3>
           <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {#each getGapOutputData().answers as { number }}
+            {#each gapData.answers as { number }}
               <div class="flex items-center gap-2 text-sm">
                 <span class="w-6 text-right text-gray-500">{number}.</span>
                 <span

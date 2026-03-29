@@ -13,8 +13,7 @@ export const defaultSettings: Settings = {
 
 // All mutable state lives in a single object
 export const store = $state({
-  sourceTextDraft: '',
-  sourceTextCommitted: '',
+  sourceText: '',
   settings: { ...defaultSettings } as Settings,
   selections: [] as GapSelection[],
   lastSelectedTokenId: null as number | null,
@@ -24,7 +23,7 @@ export const store = $state({
 
 // Derived state as getters (Svelte 5 doesn't allow exporting $derived from modules)
 const _tokens = $derived<Token[]>(
-  parseText(store.sourceTextCommitted, store.settings.keepFormatting)
+  parseText(store.sourceText, store.settings.keepFormatting)
 );
 export function getTokens(): Token[] {
   return _tokens;
@@ -51,14 +50,6 @@ export function getGapOutputData(): GapOutputData {
   return _gapOutputData;
 }
 
-export function commitSourceText() {
-  store.sourceTextCommitted = store.sourceTextDraft;
-  store.selections = [];
-  store.lastSelectedTokenId = null;
-  store.mobileRangeMode = false;
-  store.mobileRangeStart = null;
-}
-
 export function clearSelections() {
   store.selections = [];
   store.lastSelectedTokenId = null;
@@ -66,28 +57,30 @@ export function clearSelections() {
   store.mobileRangeStart = null;
 }
 
-export function handleWordClick(tokenId: number, shiftKey: boolean) {
-  const tokenToSelMap = _tokenToSelectionMap;
+function getWordIdsInRange(start: number, end: number): number[] {
+  return _tokens
+    .filter((t) => t.isWord && t.id >= start && t.id <= end)
+    .map((t) => t.id);
+}
 
+function addRangeSelection(rangeIds: number[]) {
+  store.selections = store.selections.filter(
+    (s) => !s.tokenIds.some((id) => rangeIds.includes(id))
+  );
+  store.selections = [...store.selections, { tokenIds: rangeIds, type: 'range' }];
+}
+
+export function handleWordClick(tokenId: number, shiftKey: boolean) {
   // 1. If in range mode, handle separately (don't mix with normal click logic)
   if (store.mobileRangeMode) {
     if (store.mobileRangeStart === null) {
-      // First tap: set start word
       store.mobileRangeStart = tokenId;
       return;
     }
 
-    // Second tap: create range from start to this word
     const start = Math.min(store.mobileRangeStart, tokenId);
     const end = Math.max(store.mobileRangeStart, tokenId);
-    const rangeIds = _tokens
-      .filter((t) => t.isWord && t.id >= start && t.id <= end)
-      .map((t) => t.id);
-
-    store.selections = store.selections.filter(
-      (s) => !s.tokenIds.some((id) => rangeIds.includes(id))
-    );
-    store.selections = [...store.selections, { tokenIds: rangeIds, type: 'range' }];
+    addRangeSelection(getWordIdsInRange(start, end));
     store.mobileRangeMode = false;
     store.mobileRangeStart = null;
     store.lastSelectedTokenId = tokenId;
@@ -95,7 +88,7 @@ export function handleWordClick(tokenId: number, shiftKey: boolean) {
   }
 
   // 2. Already selected? Deselect entire GapSelection
-  const existing = tokenToSelMap.get(tokenId);
+  const existing = _tokenToSelectionMap.get(tokenId);
   if (existing) {
     store.selections = store.selections.filter((s) => s !== existing);
     store.lastSelectedTokenId = null;
@@ -106,14 +99,7 @@ export function handleWordClick(tokenId: number, shiftKey: boolean) {
   if (shiftKey && store.lastSelectedTokenId !== null) {
     const start = Math.min(store.lastSelectedTokenId, tokenId);
     const end = Math.max(store.lastSelectedTokenId, tokenId);
-    const rangeIds = _tokens
-      .filter((t) => t.isWord && t.id >= start && t.id <= end)
-      .map((t) => t.id);
-
-    store.selections = store.selections.filter(
-      (s) => !s.tokenIds.some((id) => rangeIds.includes(id))
-    );
-    store.selections = [...store.selections, { tokenIds: rangeIds, type: 'range' }];
+    addRangeSelection(getWordIdsInRange(start, end));
     store.lastSelectedTokenId = tokenId;
     return;
   }
@@ -130,6 +116,18 @@ function shuffleArray<T>(arr: T[]): T[] {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+function flushPendingText(pendingText: string, items: GapOutputItem[]) {
+  const parts = pendingText.split('\n');
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i]) {
+      items.push({ type: 'text', content: parts[i] });
+    }
+    if (i < parts.length - 1) {
+      items.push({ type: 'newline', content: '\n' });
+    }
+  }
 }
 
 function buildGapOutput(
@@ -168,15 +166,7 @@ function buildGapOutput(
     }
 
     if (pendingText) {
-      const parts = pendingText.split('\n');
-      for (let i = 0; i < parts.length; i++) {
-        if (parts[i]) {
-          items.push({ type: 'text', content: parts[i] });
-        }
-        if (i < parts.length - 1) {
-          items.push({ type: 'newline', content: '\n' });
-        }
-      }
+      flushPendingText(pendingText, items);
       pendingText = '';
     }
 
@@ -186,27 +176,14 @@ function buildGapOutput(
     const answerTokens = tokens.filter((t) => sel.tokenIds.includes(t.id));
     const answer = answerTokens.map((t) => t.text).join(' ');
 
-    let gapWidthCh: number;
-    if (sel.type === 'range') {
-      const totalChars = answerTokens.reduce(
-        (sum, t) => sum + t.text.length,
-        0
-      );
-      gapWidthCh = Math.max(
-        settings.fixedGapLengthCh,
-        totalChars * settings.gapLengthConstant
-      );
-    } else {
-      gapWidthCh = settings.fixedGapLengthCh;
-    }
+    const gapWidthCh = sel.type === 'range'
+      ? Math.max(
+          settings.fixedGapLengthCh,
+          answerTokens.reduce((sum, t) => sum + t.text.length, 0) * settings.gapLengthConstant
+        )
+      : settings.fixedGapLengthCh;
 
-    items.push({
-      type: 'gap',
-      content: '',
-      gapNumber,
-      gapWidthCh,
-      answer,
-    });
+    items.push({ type: 'gap', content: '', gapNumber, gapWidthCh, answer });
 
     const lastTokenInSel = answerTokens[answerTokens.length - 1];
     if (lastTokenInSel.trailingSpace) {
@@ -218,15 +195,7 @@ function buildGapOutput(
   }
 
   if (pendingText) {
-    const parts = pendingText.split('\n');
-    for (let i = 0; i < parts.length; i++) {
-      if (parts[i]) {
-        items.push({ type: 'text', content: parts[i] });
-      }
-      if (i < parts.length - 1) {
-        items.push({ type: 'newline', content: '\n' });
-      }
-    }
+    flushPendingText(pendingText, items);
   }
 
   return {

@@ -4,9 +4,7 @@
   let hasSelections = $derived(store.selections.length > 0);
 
   function handleInput(e: Event) {
-    const value = (e.target as HTMLTextAreaElement).value;
-    store.sourceTextDraft = value;
-    store.sourceTextCommitted = value;
+    store.sourceText = (e.target as HTMLTextAreaElement).value;
   }
 
   function handleClearAndEdit() {
@@ -21,7 +19,7 @@
       {hasSelections ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}"
     rows="8"
     placeholder="Paste or type your text here..."
-    value={store.sourceTextDraft}
+    value={store.sourceText}
     oninput={handleInput}
     disabled={hasSelections}
   ></textarea>

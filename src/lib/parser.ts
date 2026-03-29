@@ -28,13 +28,14 @@ export function parseText(text: string, keepFormatting: boolean): Token[] {
     // e.g. "(hello)" → ["(", "hello", ")"]
     // e.g. "..." → ["..."]
     const parts = chunk.match(/[^\p{P}\p{S}]+|[\p{P}\p{S}]+/gu) || [chunk];
+    const punctuationOnly = /^[\p{P}\p{S}]+$/u;
 
     for (let i = 0; i < parts.length; i++) {
       const isLast = i === parts.length - 1;
       tokens.push({
         id: id++,
         text: parts[i],
-        isWord: true,
+        isWord: !punctuationOnly.test(parts[i]),
         trailingSpace: isLast ? trailingSpace : '',
       });
     }

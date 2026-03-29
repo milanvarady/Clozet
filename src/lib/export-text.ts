@@ -1,4 +1,5 @@
 import type { GapOutputData, Settings } from './types';
+import { ANSWER_UNDERSCORE_COUNT, WORD_BANK_SEPARATOR } from './export-constants';
 
 export function buildPlainText(data: GapOutputData, settings: Settings): string {
   let text = '';
@@ -25,14 +26,14 @@ export function buildPlainText(data: GapOutputData, settings: Settings): string 
   // Word bank
   if (settings.includeWordBank && data.wordBank.length > 0) {
     text += '\n\nWORD BANK\n';
-    text += data.wordBank.join(' | ');
+    text += data.wordBank.join(WORD_BANK_SEPARATOR);
   }
 
   // Answer section
   if (settings.includeAnswerSection && data.answers.length > 0) {
     text += '\n\nANSWERS\n';
     for (const answer of data.answers) {
-      text += `${answer.number}. ${'_'.repeat(30)}\n`;
+      text += `${answer.number}. ${'_'.repeat(ANSWER_UNDERSCORE_COUNT)}\n`;
     }
   }
 

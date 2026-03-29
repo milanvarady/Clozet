@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import type { GapOutputData, Settings } from './types';
+import { ANSWER_UNDERSCORE_COUNT, WORD_BANK_COLUMNS } from './export-constants';
 
 export async function exportPdf(data: GapOutputData, settings: Settings) {
   const doc = new jsPDF({
@@ -48,24 +49,25 @@ export async function exportPdf(data: GapOutputData, settings: Settings) {
     doc.text('Word Bank', margin, y);
     y += 4;
 
-    const wordText = data.wordBank.join(' / ');
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
 
-    const textLines = doc.splitTextToSize(wordText, maxWidth - 10);
-    const lineSpacing = 6;
-    const fontHeight = 4;
-    const textBlockHeight = (textLines.length - 1) * lineSpacing + fontHeight;
+    const cols = WORD_BANK_COLUMNS;
+    const rows = Math.ceil(data.wordBank.length / cols);
+    const colWidth = (maxWidth - 8) / cols;
+    const rowHeight = 7;
     const borderPadding = 4;
-    const borderHeight = textBlockHeight + borderPadding * 2;
+    const borderHeight = rows * rowHeight + borderPadding * 2;
 
     doc.roundedRect(margin, y, maxWidth, borderHeight, 2, 2);
 
-    const textStartX = margin + borderPadding;
-    const textStartY = y + borderPadding + fontHeight;
-    textLines.forEach((line: string, index: number) => {
-      doc.text(line, textStartX, textStartY + index * lineSpacing);
-    });
+    for (let i = 0; i < data.wordBank.length; i++) {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = margin + borderPadding + col * colWidth + colWidth / 2;
+      const yPos = y + borderPadding + 4 + row * rowHeight;
+      doc.text(data.wordBank[i], x, yPos, { align: 'center' });
+    }
 
     y += borderHeight + 10;
   }
@@ -84,7 +86,7 @@ export async function exportPdf(data: GapOutputData, settings: Settings) {
 
     for (const answer of data.answers) {
       y = checkNewPage(doc, y, pageHeight, margin);
-      doc.text(`${answer.number}. ${'_'.repeat(40)}`, margin, y);
+      doc.text(`${answer.number}. ${'_'.repeat(ANSWER_UNDERSCORE_COUNT)}`, margin, y);
       y += 10;
     }
   }
@@ -124,6 +126,7 @@ function buildPlainTextForPdf(data: GapOutputData, settings: Settings): string {
       if (settings.numberGaps) {
         text += `(${item.gapNumber}) `;
       }
+      // 1.2x scale: PDF uses proportional fonts, so underscores are narrower than monospace `ch` units
       text += '_'.repeat(Math.round((item.gapWidthCh ?? 15) * 1.2)) + ' ';
     }
   }

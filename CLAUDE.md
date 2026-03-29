@@ -35,8 +35,8 @@ Single-page app with a vertical step-by-step workflow. All sections are always v
 All reactive state lives in `src/lib/state.svelte.ts` as a single `$state` object (`store`). Derived values (tokens, selection maps, gap output data) use `$derived` but are exposed via getter functions because Svelte 5 doesn't allow exporting `$derived` from `.svelte.ts` modules.
 
 Key data flow:
-- `store.sourceTextDraft` / `store.sourceTextCommitted` — text commits live on every keystroke (no "Apply" button)
-- `_tokens` (derived) → `parseText()` splits committed text into `Token[]`
+- `store.sourceText` — updated on every keystroke
+- `_tokens` (derived) → `parseText()` splits source text into `Token[]`
 - `store.selections: GapSelection[]` — each selection has `tokenIds[]` and `type` ('individual' | 'range')
 - `_gapOutputData` (derived) → walks tokens + selections to build the preview output
 
@@ -48,7 +48,7 @@ Key data flow:
 
 ### Parser
 
-`src/lib/parser.ts` splits text into tokens using a Unicode-aware regex (`/[^\p{P}\p{S}]+|[\p{P}\p{S}]+/gu`) that separates punctuation from words. So `"hello,"` becomes two tokens: `"hello"` and `","`, each independently selectable. The `keepFormatting` flag controls whether multiple newlines/spaces are collapsed.
+`src/lib/parser.ts` splits text into tokens using a Unicode-aware regex (`/[^\p{P}\p{S}]+|[\p{P}\p{S}]+/gu`) that separates punctuation from words. So `"hello,"` becomes two tokens: `"hello"` (isWord: true) and `","` (isWord: false). Only word tokens are selectable as gaps. The `keepFormatting` flag controls whether multiple newlines/spaces are collapsed.
 
 ### Source Text Locking
 
@@ -75,14 +75,15 @@ There is no confirmation dialog — the textarea is simply locked.
 - `SettingsPanel` — worksheet title, numbered gaps, word bank, answer section, gap length slider (5-30)
 - `OutputPreview` — live worksheet preview; always shows text, renders title when set, gap number + underline wrapped in `whitespace-nowrap` to prevent splitting across lines
 - `ExportBar` — PDF/DOCX/Copy Raw Text/Print buttons
-- `ConfirmDialog` — reusable modal (currently unused but kept)
+- `TrailingSpace` — shared snippet for rendering trailing whitespace/newlines after tokens
 
 ### Export
 
-- **PDF**: `jsPDF` builds document programmatically from `GapOutputData` (not from DOM). Supports mobile share via Web Share API. Uses worksheet title as filename.
+- **PDF**: `jsPDF` builds document programmatically from `GapOutputData` (not from DOM). Supports mobile share via Web Share API. Uses worksheet title as filename. Gap width scaled 1.2x to compensate for proportional font vs monospace `ch` units.
 - **DOCX**: `docx` package builds document programmatically. 14pt text, 1.5x line spacing, spacious answer section. Uses worksheet title as filename.
 - **Copy Raw Text**: Builds plain text from `GapOutputData`, copies to clipboard via `navigator.clipboard.writeText()`
 - **Print**: `window.print()` with `@media print` stylesheet hiding `.no-print` elements
+- Shared constants (answer underscore count, word bank separator) in `src/lib/export-constants.ts`
 
 ### Tailwind v4 Notes
 

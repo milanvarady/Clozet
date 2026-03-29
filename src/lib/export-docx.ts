@@ -5,11 +5,17 @@ import {
   Packer,
   BorderStyle,
   HeadingLevel,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+  AlignmentType,
 } from 'docx';
 import type { GapOutputData, Settings } from './types';
+import { ANSWER_UNDERSCORE_COUNT, WORD_BANK_COLUMNS } from './export-constants';
 
 export async function exportDocx(data: GapOutputData, settings: Settings) {
-  const paragraphs: Paragraph[] = [];
+  const paragraphs: (Paragraph | Table)[] = [];
 
   // Title
   if (settings.worksheetTitle) {
@@ -81,17 +87,30 @@ export async function exportDocx(data: GapOutputData, settings: Settings) {
         },
       })
     );
-    paragraphs.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: data.wordBank.join('   |   '),
-            size: 26,
-          }),
-        ],
-        spacing: { after: 120 },
-      })
-    );
+    const noBorder = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+    const cellBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
+    const cols = WORD_BANK_COLUMNS;
+    const rows: TableRow[] = [];
+    for (let r = 0; r < Math.ceil(data.wordBank.length / cols); r++) {
+      const cells: TableCell[] = [];
+      for (let c = 0; c < cols; c++) {
+        const word = data.wordBank[r * cols + c] ?? '';
+        cells.push(
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [new TextRun({ text: word, size: 24 })],
+                alignment: AlignmentType.CENTER,
+              }),
+            ],
+            borders: cellBorders,
+            width: { size: 100 / cols, type: WidthType.PERCENTAGE },
+          })
+        );
+      }
+      rows.push(new TableRow({ children: cells }));
+    }
+    paragraphs.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
   }
 
   // Answer section
@@ -117,7 +136,7 @@ export async function exportDocx(data: GapOutputData, settings: Settings) {
         new Paragraph({
           children: [
             new TextRun({
-              text: `${answer.number}. ${'_'.repeat(50)}`,
+              text: `${answer.number}. ${'_'.repeat(ANSWER_UNDERSCORE_COUNT)}`,
               size: 26,
             }),
           ],

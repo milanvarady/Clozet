@@ -5,9 +5,7 @@
     token: Token;
     isSelected: boolean;
     selectionType: SelectionType | null;
-    isRangeStart: boolean;
-    isRangeEnd: boolean;
-    isRangeMiddle: boolean;
+    rangePosition: 'start' | 'end' | 'middle' | 'single' | null;
     isRangePending: boolean;
     onclick: (tokenId: number, shiftKey: boolean) => void;
   }
@@ -16,9 +14,7 @@
     token,
     isSelected,
     selectionType,
-    isRangeStart,
-    isRangeEnd,
-    isRangeMiddle,
+    rangePosition,
     isRangePending,
     onclick,
   }: Props = $props();
@@ -26,6 +22,13 @@
   function handleClick(e: MouseEvent) {
     onclick(token.id, e.shiftKey);
   }
+
+  const roundingMap: Record<string, string> = {
+    start: 'rounded-l-md',
+    end: 'rounded-r-md',
+    middle: 'rounded-none',
+    single: 'rounded-md',
+  };
 
   function classes(): string {
     const base = 'inline cursor-pointer border-none px-1 py-0.5 font-mono text-sm transition-colors select-none';
@@ -39,18 +42,9 @@
     }
 
     if (selectionType === 'range') {
-      // Range: blue background, connected strip look
-      const rounding = isRangeStart
-        ? 'rounded-l-md'
-        : isRangeEnd
-          ? 'rounded-r-md'
-          : isRangeMiddle
-            ? 'rounded-none'
-            : 'rounded-md';
-      return `${base} bg-blue-200 text-blue-900 font-medium ${rounding}`;
+      return `${base} bg-blue-200 text-blue-900 font-medium ${roundingMap[rangePosition ?? 'single']}`;
     }
 
-    // Individual: amber background
     return `${base} bg-amber-200 text-amber-900 font-medium rounded-md`;
   }
 </script>

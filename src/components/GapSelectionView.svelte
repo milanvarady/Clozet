@@ -7,29 +7,19 @@
     handleWordClick,
   } from '../lib/state.svelte';
   import WordToken from './WordToken.svelte';
+  import TrailingSpace from './TrailingSpace.svelte';
   import type { SelectionType } from '../lib/types';
 
-  function getSelectionType(tokenId: number): SelectionType | null {
+  function getTokenSelectionInfo(tokenId: number): {
+    type: SelectionType | null;
+    position: 'start' | 'end' | 'middle' | 'single' | null;
+  } {
     const sel = getTokenToSelectionMap().get(tokenId);
-    return sel ? sel.type : null;
-  }
-
-  function isRangeStart(tokenId: number): boolean {
-    const sel = getTokenToSelectionMap().get(tokenId);
-    return sel?.type === 'range' && sel.tokenIds[0] === tokenId;
-  }
-
-  function isRangeEnd(tokenId: number): boolean {
-    const sel = getTokenToSelectionMap().get(tokenId);
-    return (
-      sel?.type === 'range' && sel.tokenIds[sel.tokenIds.length - 1] === tokenId
-    );
-  }
-
-  function isRangeMiddle(tokenId: number): boolean {
-    const sel = getTokenToSelectionMap().get(tokenId);
-    if (!sel || sel.type !== 'range') return false;
-    return sel.tokenIds[0] !== tokenId && sel.tokenIds[sel.tokenIds.length - 1] !== tokenId;
+    if (!sel) return { type: null, position: null };
+    if (sel.type !== 'range') return { type: sel.type, position: 'single' };
+    if (sel.tokenIds[0] === tokenId) return { type: 'range', position: 'start' };
+    if (sel.tokenIds[sel.tokenIds.length - 1] === tokenId) return { type: 'range', position: 'end' };
+    return { type: 'range', position: 'middle' };
   }
 
   function toggleRangeMode() {
@@ -37,10 +27,6 @@
     if (!store.mobileRangeMode) {
       store.mobileRangeStart = null;
     }
-  }
-
-  function onWordClick(tokenId: number, shiftKey: boolean) {
-    handleWordClick(tokenId, shiftKey);
   }
 </script>
 
@@ -91,24 +77,17 @@
     >
       {#each getTokens() as token (token.id)}
         {#if token.isWord}
+          {@const info = getTokenSelectionInfo(token.id)}
           <WordToken
             {token}
             isSelected={getSelectedTokenIdSet().has(token.id)}
-            selectionType={getSelectionType(token.id)}
-            isRangeStart={isRangeStart(token.id)}
-            isRangeEnd={isRangeEnd(token.id)}
-            isRangeMiddle={isRangeMiddle(token.id)}
+            selectionType={info.type}
+            rangePosition={info.position}
             isRangePending={store.mobileRangeMode && store.mobileRangeStart === token.id}
-            onclick={onWordClick}
+            onclick={handleWordClick}
           />
         {/if}
-        {#if token.trailingSpace.includes('\n')}
-          {#each token.trailingSpace.match(/\n/g) ?? [] as _}
-            <br />
-          {/each}
-        {:else}
-          {' '}
-        {/if}
+        <TrailingSpace trailingSpace={token.trailingSpace} />
       {/each}
     </div>
   {/if}
