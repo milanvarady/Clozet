@@ -1,113 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Create fill-in-the-blank handouts or cloze tests with this simple, free tool.">
-    <title>Clozet</title>
-    <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml"/>
-    <link rel="stylesheet" href="css/pico.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/print.css" media="print">
-</head>
-<body>
-    <main class="container">
-                <h1>Clozet</h1>
-        <p>Create fill-in-the-blank handouts or cloze tests with this simple, free tool.</p>
-        <section>
-            <h2>Paste your text</h2>
-            <textarea id="inputText" rows="10" placeholder="Paste your text here..."></textarea>
-            <label id="keepFormattingLabel" data-tooltip="If unchecked all newlines will be ignored">
-                <input type="checkbox" id="keepFormatting" checked>
-                Keep original format
-            </label>
-        </section>
-        <hr/>
-        <section>
-            <h2>Select words to hide</h2>
-            <p class="warning">(Selection will be lost if you edit the source text)</p>
-            <article>
-                <div id="wordSelection" class="grid"></div>
-            </article>
-            <label class="range-mode-toggle">
-                    <input type="checkbox" id="rangeMode">
-                    Range selection mode
-                </label>
-            <details id="selectRanges">
-              <summary>How to select ranges? (click to expand)</summary>
-                <p></p>
-                <p>
-                    To select a range, such as a whole sentence, turn on <b>Range selection mode</b>.
-                    Then, select the start and endpoint of the range.
-                </p>
-                <p>
-                    On desktop, select a range without turning on <b>Range selection mode</b>.
-                    First select the start, then hold down <kbd>Shift</kbd> and select the endpoint.
-                </p>
-                <P>Note that punctuation marks are individual units and must be selected separately.</P>
-            </details>
-        </section>
-        <hr/>
-        <section>
-            <h2>Settings</h2>
-            <div class="settings-group">
-                <div class="grid">
-                    <label>
-                        <input type="checkbox" id="numberGaps" checked> Number gaps
-                    </label>
-                    <label>
-                        <input type="checkbox" id="includeWordBank"> Include word bank
-                    </label>
-                    <label>
-                        <input type="checkbox" id="separateAnswers"> Separate answers section
-                    </label>
-                </div>
-                <div class="grid" id="titleAndGapLengthContainer">
-                    <label>
-                        <input type="text" id="worksheetTitle" placeholder="Worksheet title (optional)">
-                    </label>
-                    <div>
-                        <label for="gapLength">Gap length: <span id="gapLengthValue">10</span></label>
-                        <input type="range" id="gapLength" min="5" max="20" value="10">
-                    </div>
-                </div>
-            </div>
-        </section>
-        <hr/>
-        <section id="outputSection">
-            <h2>Output</h2>
-            <article id="output">
-                <div id="outputContainer">
-                    <h3 id="outputTitle"></h3>
-                    <div id="outputText"></div>
-                </div>
-                <div id="wordBank"></div>
-                <div id="answerSection"></div>
-            </article>
-        </section>
-        <section id="saveSection">
-            <div class="grid">
-                <button id="downloadPdf">📄 Download PDF</button>
-                <button id="downloadDocx">📝 Download DOCX</button>
-                <button id="copyText">📋 Copy Plain Text</button>
-                <button id="printButton" onclick="window.print()">🖨️ Print</button>
-            </div>
-        </section>
-        <footer>
-            <p>
-                This project is open source. View source code on <a href="https://github.com/milanvarady/Clozet" target="_blank">GitHub</a>.
-                Created by Milán Várady.
-            </p>
-        </footer>
-    </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/docx@9.5.1/dist/index.umd.cjs"></script>
-    <script type="module" src="js/main.js"></script>
-    <script
-      src="https://beamanalytics.b-cdn.net/beam.min.js"
-      data-token="cd316862-af6b-49e7-a999-67ef5833d855"
-      async
-    >
-    </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clozet — Cloze Test Maker</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

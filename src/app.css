@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gap-individual: oklch(0.9 0.1 85);
+  --color-gap-range: oklch(0.88 0.08 240);
+  --color-gap-hover: oklch(0.95 0.03 240);
+  --color-primary: oklch(0.55 0.2 260);
+  --color-primary-light: oklch(0.65 0.15 260);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  #worksheet-preview {
+    margin: 0;
+    padding: 0;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: black;
+    background: white;
+  }
+
+  #worksheet-preview .word-bank {
+    page-break-inside: avoid;
+  }
+
+  #worksheet-preview .answer-section {
+    page-break-inside: avoid;
+  }
+}

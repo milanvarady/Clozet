@@ -142,3 +142,19 @@ Temporary Items
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,jetbrains+all
+
+### Node ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+### Vite ###
+dist/
+*.local
+.env
+.env.*
+
+### Svelte ###
+.svelte-kit/
