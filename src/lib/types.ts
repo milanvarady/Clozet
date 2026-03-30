@@ -1,7 +1,6 @@
 export interface Token {
   id: number;
   text: string;
-  isWord: boolean;
   trailingSpace: string;
 }
 

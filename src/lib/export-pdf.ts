@@ -53,20 +53,43 @@ export async function exportPdf(data: GapOutputData, settings: Settings) {
     doc.setFont('helvetica', 'normal');
 
     const cols = WORD_BANK_COLUMNS;
-    const rows = Math.ceil(data.wordBank.length / cols);
-    const colWidth = (maxWidth - 8) / cols;
-    const rowHeight = 7;
+    const numRows = Math.ceil(data.wordBank.length / cols);
     const borderPadding = 4;
-    const borderHeight = rows * rowHeight + borderPadding * 2;
+    const cellPadding = 2;
+    const colWidth = (maxWidth - borderPadding * 2) / cols;
+    const lineHeight = 5;
 
+    // Pre-wrap each word and compute row heights
+    const wrappedCells: string[][] = data.wordBank.map(
+      (w) => doc.splitTextToSize(w, colWidth - cellPadding * 2) as string[]
+    );
+    const rowHeights: number[] = [];
+    for (let r = 0; r < numRows; r++) {
+      let maxLines = 1;
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        if (idx < wrappedCells.length) {
+          maxLines = Math.max(maxLines, wrappedCells[idx].length);
+        }
+      }
+      rowHeights.push(maxLines * lineHeight + cellPadding * 2);
+    }
+
+    const borderHeight = rowHeights.reduce((s, h) => s + h, 0) + borderPadding * 2;
     doc.roundedRect(margin, y, maxWidth, borderHeight, 2, 2);
 
-    for (let i = 0; i < data.wordBank.length; i++) {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const x = margin + borderPadding + col * colWidth + colWidth / 2;
-      const yPos = y + borderPadding + 4 + row * rowHeight;
-      doc.text(data.wordBank[i], x, yPos, { align: 'center' });
+    let rowY = y + borderPadding;
+    for (let r = 0; r < numRows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const idx = r * cols + c;
+        if (idx >= wrappedCells.length) break;
+        const x = margin + borderPadding + c * colWidth + colWidth / 2;
+        const textY = rowY + cellPadding + lineHeight * 0.8;
+        wrappedCells[idx].forEach((line, li) => {
+          doc.text(line, x, textY + li * lineHeight, { align: 'center' });
+        });
+      }
+      rowY += rowHeights[r];
     }
 
     y += borderHeight + 10;
@@ -126,7 +149,7 @@ function buildPlainTextForPdf(data: GapOutputData, settings: Settings): string {
       if (settings.numberGaps) {
         text += `(${item.gapNumber}) `;
       }
-      // 1.2x scale: PDF uses proportional fonts, so underscores are narrower than monospace `ch` units
+      // 1.2x scale: compensate for ch-to-Helvetica width difference
       text += '_'.repeat(Math.round((item.gapWidthCh ?? 15) * 1.2)) + ' ';
     }
   }

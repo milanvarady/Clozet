@@ -43,8 +43,12 @@ export function getTokenToSelectionMap(): Map<number, GapSelection> {
   return _tokenToSelectionMap;
 }
 
+const _tokenById = $derived<Map<number, Token>>(
+  new Map(_tokens.map((t) => [t.id, t]))
+);
+
 const _gapOutputData = $derived<GapOutputData>(
-  buildGapOutput(_tokens, store.selections, store.settings)
+  buildGapOutput(_tokens, store.selections, store.settings, _selectedTokenIdSet, _tokenToSelectionMap, _tokenById)
 );
 export function getGapOutputData(): GapOutputData {
   return _gapOutputData;
@@ -57,15 +61,14 @@ export function clearSelections() {
   store.mobileRangeStart = null;
 }
 
-function getWordIdsInRange(start: number, end: number): number[] {
-  return _tokens
-    .filter((t) => t.isWord && t.id >= start && t.id <= end)
-    .map((t) => t.id);
+function getTokenIdsInRange(start: number, end: number): number[] {
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
 
 function addRangeSelection(rangeIds: number[]) {
+  const rangeSet = new Set(rangeIds);
   store.selections = store.selections.filter(
-    (s) => !s.tokenIds.some((id) => rangeIds.includes(id))
+    (s) => !s.tokenIds.some((id) => rangeSet.has(id))
   );
   store.selections = [...store.selections, { tokenIds: rangeIds, type: 'range' }];
 }
@@ -80,7 +83,7 @@ export function handleWordClick(tokenId: number, shiftKey: boolean) {
 
     const start = Math.min(store.mobileRangeStart, tokenId);
     const end = Math.max(store.mobileRangeStart, tokenId);
-    addRangeSelection(getWordIdsInRange(start, end));
+    addRangeSelection(getTokenIdsInRange(start, end));
     store.mobileRangeMode = false;
     store.mobileRangeStart = null;
     store.lastSelectedTokenId = tokenId;
@@ -99,7 +102,7 @@ export function handleWordClick(tokenId: number, shiftKey: boolean) {
   if (shiftKey && store.lastSelectedTokenId !== null) {
     const start = Math.min(store.lastSelectedTokenId, tokenId);
     const end = Math.max(store.lastSelectedTokenId, tokenId);
-    addRangeSelection(getWordIdsInRange(start, end));
+    addRangeSelection(getTokenIdsInRange(start, end));
     store.lastSelectedTokenId = tokenId;
     return;
   }
@@ -133,24 +136,21 @@ function flushPendingText(pendingText: string, items: GapOutputItem[]) {
 function buildGapOutput(
   tokens: Token[],
   selections: GapSelection[],
-  settings: Settings
+  settings: Settings,
+  selectedIds: Set<number>,
+  tokenSelMap: Map<number, GapSelection>,
+  tokenById: Map<number, Token>
 ): GapOutputData {
   const items: GapOutputItem[] = [];
   const answers: { number: number; answer: string }[] = [];
   const wordBankItems: string[] = [];
 
-  const selectedIds = new Set(selections.flatMap((s) => s.tokenIds));
-  const tokenSelMap = new Map(
-    selections.flatMap((s) => s.tokenIds.map((id) => [id, s] as const))
-  );
-
   const renderedSelections = new Set<GapSelection>();
 
-  const sortedSelections = [...selections].sort(
-    (a, b) => Math.min(...a.tokenIds) - Math.min(...b.tokenIds)
-  );
   const selectionNumberMap = new Map<GapSelection, number>();
-  sortedSelections.forEach((s, i) => selectionNumberMap.set(s, i + 1));
+  [...selections]
+    .sort((a, b) => a.tokenIds[0] - b.tokenIds[0])
+    .forEach((s, i) => selectionNumberMap.set(s, i + 1));
 
   let pendingText = '';
 
@@ -173,8 +173,10 @@ function buildGapOutput(
     renderedSelections.add(sel);
     const gapNumber = selectionNumberMap.get(sel)!;
 
-    const answerTokens = tokens.filter((t) => sel.tokenIds.includes(t.id));
-    const answer = answerTokens.map((t) => t.text).join(' ');
+    const answerTokens = sel.tokenIds.map((id) => tokenById.get(id)!);
+    const answer = answerTokens
+      .map((t, i) => i < answerTokens.length - 1 ? t.text + t.trailingSpace : t.text)
+      .join('');
 
     const gapWidthCh = sel.type === 'range'
       ? Math.max(

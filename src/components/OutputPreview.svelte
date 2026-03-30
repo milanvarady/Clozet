@@ -35,7 +35,7 @@
           {:else if item.type === 'newline'}
             <br />
           {:else if item.type === 'gap'}
-            <span class="inline-flex whitespace-nowrap items-baseline">{#if store.settings.numberGaps}<span class="text-sm text-gray-500">({item.gapNumber})</span>{/if}<span
+            <span class="inline items-baseline">{#if store.settings.numberGaps}<span class="whitespace-nowrap text-sm text-gray-500">({item.gapNumber})</span>{/if}<span
               class="mx-0.5 inline border-b-2 border-gray-800 tracking-[0.5em]"
             >{'\u00A0'.repeat(Math.round(item.gapWidthCh ?? 10))}</span></span>
           {/if}
@@ -47,9 +47,9 @@
           <h3 class="mb-2 text-sm font-semibold text-gray-700 uppercase">
             Word Bank
           </h3>
-          <div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-3 md:grid-cols-4">
+          <div class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3 md:grid-cols-4">
             {#each gapData.wordBank as word}
-              <span class="py-0.5 text-center">{word}</span>
+              <span class="text-center">{word}</span>
             {/each}
           </div>
         </div>

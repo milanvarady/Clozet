@@ -76,17 +76,15 @@
       class="rounded-lg border border-gray-200 bg-gray-50 p-4 leading-relaxed"
     >
       {#each getTokens() as token (token.id)}
-        {#if token.isWord}
-          {@const info = getTokenSelectionInfo(token.id)}
-          <WordToken
-            {token}
-            isSelected={getSelectedTokenIdSet().has(token.id)}
-            selectionType={info.type}
-            rangePosition={info.position}
-            isRangePending={store.mobileRangeMode && store.mobileRangeStart === token.id}
-            onclick={handleWordClick}
-          />
-        {/if}
+        {@const info = getTokenSelectionInfo(token.id)}
+        <WordToken
+          {token}
+          isSelected={getSelectedTokenIdSet().has(token.id)}
+          selectionType={info.type}
+          rangePosition={info.position}
+          isRangePending={store.mobileRangeMode && store.mobileRangeStart === token.id}
+          onclick={handleWordClick}
+        />
         <TrailingSpace trailingSpace={token.trailingSpace} />
       {/each}
     </div>

@@ -48,7 +48,7 @@ Key data flow:
 
 ### Parser
 
-`src/lib/parser.ts` splits text into tokens using a Unicode-aware regex (`/[^\p{P}\p{S}]+|[\p{P}\p{S}]+/gu`) that separates punctuation from words. So `"hello,"` becomes two tokens: `"hello"` (isWord: true) and `","` (isWord: false). Only word tokens are selectable as gaps. The `keepFormatting` flag controls whether multiple newlines/spaces are collapsed.
+`src/lib/parser.ts` splits text into tokens using a Unicode-aware regex (`/[^\p{P}\p{S}]+|[\p{P}\p{S}]+/gu`) that separates punctuation from words. So `"hello,"` becomes two tokens: `"hello"` and `","`, both independently selectable as gaps. The `keepFormatting` flag controls whether multiple newlines/spaces are collapsed.
 
 ### Source Text Locking
 
