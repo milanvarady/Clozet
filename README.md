@@ -2,7 +2,7 @@
 
 A free, client-side cloze test (fill-the-gaps) worksheet maker for language teachers. Paste text, select words as gaps, and export a printable worksheet. No sign-up, no server — everything runs in your browser.
 
-**Try it:** [milanvarady.github.io/Clozet](https://milanvarady.github.io/Clozet/)
+**Try it at** [milanvarady.github.io/Clozet](https://milanvarady.github.io/Clozet/)
 
 ## Features
 
